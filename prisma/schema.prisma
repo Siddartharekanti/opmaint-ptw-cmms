@@ -1,0 +1,153 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String     @id @default(cuid())
+  email          String     @unique
+  password       String
+  name           String
+  role           String     // REQUESTER | AREA_OWNER | SAFETY_OFFICER | ADMIN
+  department     String?
+  phone          String?
+  assignedAreaId String?
+  assignedArea   Area?      @relation(fields: [assignedAreaId], references: [id])
+  
+  permits        Permit[]   @relation("PermitRequester")
+  approvals      Approval[]
+  workLogs       WorkLog[]
+  auditLogs      AuditLog[]
+
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+}
+
+model Plant {
+  id        String   @id @default(cuid())
+  name      String
+  code      String   @unique
+  location  String
+  areas     Area[]
+  permits   Permit[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Area {
+  id            String      @id @default(cuid())
+  name          String
+  code          String
+  plantId       String
+  plant         Plant       @relation(fields: [plantId], references: [id], onDelete: Cascade)
+  equipment     Equipment[]
+  permits       Permit[]
+  assignedUsers User[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([plantId, code])
+}
+
+model Equipment {
+  id          String   @id @default(cuid())
+  name        String
+  tag         String   @unique
+  areaId      String
+  area        Area     @relation(fields: [areaId], references: [id], onDelete: Cascade)
+  criticality String   @default("HIGH") // LOW, MEDIUM, HIGH, CRITICAL
+  permits     Permit[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Permit {
+  id                   String     @id @default(cuid())
+  permitNumber         String     @unique
+  title                String
+  description          String
+  permitType           String     // HOT_WORK | CONFINED_SPACE | WORKING_AT_HEIGHT | ELECTRICAL_LOTO | EXCAVATION
+  status               String     @default("DRAFT") // DRAFT, PENDING_APPROVAL, APPROVED, ACTIVE, SUSPENDED, CLOSED, CLOSED_VERIFIED, REJECTED, EXPIRED, CANCELLED
+  
+  plantId              String
+  plant                Plant      @relation(fields: [plantId], references: [id])
+  areaId               String
+  area                 Area       @relation(fields: [areaId], references: [id])
+  equipmentId          String?
+  equipment            Equipment? @relation(fields: [equipmentId], references: [id])
+
+  requesterId          String
+  requester            User       @relation("PermitRequester", fields: [requesterId], references: [id])
+  contractorTeam       String
+
+  plannedStartTime     DateTime
+  plannedEndTime       DateTime
+  actualStartTime      DateTime?
+  actualEndTime        DateTime?
+  
+  extendedUntil        DateTime?
+  extensionCount       Int        @default(0)
+
+  hazardsIdentified    String     // JSON array of strings
+  ppeRequired          String     // JSON array of strings
+  precautionsChecklist String     // JSON array of items with { text, verified, note }
+  typeSpecificData     String     // JSON object with dynamic type fields
+
+  rejectionReason      String?
+  suspensionReason     String?
+  completionNotes      String?
+  verificationNotes    String?
+
+  approvals            Approval[]
+  auditLogs            AuditLog[]
+  workLogs             WorkLog[]
+
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+}
+
+model Approval {
+  id               String   @id @default(cuid())
+  permitId         String
+  permit           Permit   @relation(fields: [permitId], references: [id], onDelete: Cascade)
+  approverId       String
+  approver         User     @relation(fields: [approverId], references: [id])
+  roleAtApproval   String   // AREA_OWNER | SAFETY_OFFICER | ADMIN
+  status           String   // APPROVED | REJECTED
+  comment          String?
+  rejectionReason  String?
+  digitalSignature String?  // Base64 PNG signature data URL
+  timestamp        DateTime @default(now())
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  permitId    String
+  permit      Permit   @relation(fields: [permitId], references: [id], onDelete: Cascade)
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  userName    String
+  userRole    String
+  action      String   // CREATED_DRAFT, SUBMITTED, APPROVED, REJECTED, ACTIVATED, SUSPENDED, RESUMED, CLOSED, VERIFIED, CANCELLED, EXPIRED, EXTENDED, UPDATED_FIELDS
+  fromStatus  String?
+  toStatus    String?
+  comment     String?
+  changesJson String?  // JSON stringified diff
+  timestamp   DateTime @default(now())
+}
+
+model WorkLog {
+  id           String   @id @default(cuid())
+  permitId     String
+  permit       Permit   @relation(fields: [permitId], references: [id], onDelete: Cascade)
+  loggedById   String
+  loggedBy     User     @relation(fields: [loggedById], references: [id])
+  loggedByName String
+  action       String
+  notes        String?
+  timestamp    DateTime @default(now())
+}
