@@ -1,6 +1,12 @@
 # Opmaint CMMS — Permit to Work (PTW) Module
 
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/Siddartharekanti/opmaint-ptw-cmms)
+[![Tests Passing](https://img.shields.io/badge/Vitest-24%20Passed-emerald)](https://github.com/Siddartharekanti/opmaint-ptw-cmms)
+[![Stack](https://img.shields.io/badge/Stack-Next.js%2014%20%7C%20TypeScript%20%7C%20Prisma-orange)](https://github.com/Siddartharekanti/opmaint-ptw-cmms)
+
 A safety-critical **Permit to Work (PTW)** module engineered for heavy industrial facilities (manufacturing, chemical, and automotive plants across Chennai and India). Built with Next.js 14, TypeScript, Tailwind CSS, and Prisma ORM.
+
+**Repository URL**: [https://github.com/Siddartharekanti/opmaint-ptw-cmms](https://github.com/Siddartharekanti/opmaint-ptw-cmms)
 
 ---
 
