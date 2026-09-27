@@ -12,7 +12,11 @@ export const dynamic = 'force-dynamic';
 export async function GET(req: NextRequest) {
   try {
     // 1. First, run the automatic expiry engine to ensure validity timestamps are current
-    await autoExpirePassedPermits();
+    try {
+      await autoExpirePassedPermits();
+    } catch (e) {
+      console.warn('Auto-expire non-fatal warning:', e);
+    }
 
     const currentUser = getCurrentUserFromRequest(req);
     const { searchParams } = new URL(req.url);
@@ -155,9 +159,9 @@ export async function GET(req: NextRequest) {
         suspendedCount,
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error listing permits:', error);
-    return NextResponse.json({ error: 'Failed to retrieve permits' }, { status: 500 });
+    return NextResponse.json({ error: error?.message || 'Failed to retrieve permits' }, { status: 500 });
   }
 }
 
