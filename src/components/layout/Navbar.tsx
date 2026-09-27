@@ -110,17 +110,32 @@ export const Navbar = () => {
             </Link>
 
             {/* Navigation links */}
-            <nav className="hidden md:flex items-center gap-1 text-xs font-semibold">
+            <nav className="hidden md:flex items-center gap-2 text-xs font-semibold">
               <Link
                 href="/"
                 className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
                   pathname === '/'
-                    ? 'bg-slate-800 text-sky-400'
+                    ? 'bg-slate-800 text-amber-400'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
                 }`}
               >
                 <LayoutDashboard className="h-4 w-4" />
                 <span>Permits Dashboard</span>
+              </Link>
+
+              <Link
+                href="/portfolio"
+                className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all ${
+                  pathname === '/portfolio'
+                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                    : 'text-amber-400/90 hover:text-amber-200 hover:bg-amber-950/40 border border-amber-500/30'
+                }`}
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                </span>
+                <span>👨‍💻 Developer Portfolio</span>
               </Link>
             </nav>
           </div>
